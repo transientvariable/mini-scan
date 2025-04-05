@@ -8,8 +8,10 @@ import (
 	"math/rand"
 	"time"
 
-	"cloud.google.com/go/pubsub"
 	"github.com/censys/scan-takehome/pkg/scanning"
+
+	"cloud.google.com/go/pubsub"
+	"github.com/transientvariable/log-go"
 )
 
 var (
@@ -20,17 +22,16 @@ func main() {
 	projectId := flag.String("project", "test-project", "GCP Project ID")
 	topicId := flag.String("topic", "scan-topic", "GCP PubSub Topic ID")
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	client, err := pubsub.NewClient(ctx, *projectId)
 	if err != nil {
-		panic(err)
+		log.Fatal("[pubsub]", log.Err(err))
 	}
 
 	topic := client.Topic(*topicId)
-
 	for range time.Tick(time.Second) {
-
 		scan := &scanning.Scan{
 			Ip:        fmt.Sprintf("1.1.1.%d", rand.Intn(255)),
 			Port:      uint32(rand.Intn(65535)),
@@ -39,7 +40,6 @@ func main() {
 		}
 
 		serviceResp := fmt.Sprintf("service response: %d", rand.Intn(100))
-
 		if rand.Intn(2) == 0 {
 			scan.DataVersion = scanning.V1
 			scan.Data = &scanning.V1Data{ResponseBytesUtf8: []byte(serviceResp)}
@@ -50,12 +50,15 @@ func main() {
 
 		encoded, err := json.Marshal(scan)
 		if err != nil {
-			panic(err)
+			log.Fatal("[pubsub]", log.Err(err))
 		}
 
 		_, err = topic.Publish(ctx, &pubsub.Message{Data: encoded}).Get(ctx)
 		if err != nil {
-			panic(err)
+			log.Fatal("[pubsub]", log.Err(err))
 		}
+
+		sub := client.Subscription(*topicId)
+		sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {})
 	}
 }

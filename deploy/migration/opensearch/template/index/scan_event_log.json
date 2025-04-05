@@ -1,0 +1,28 @@
+{
+  "_meta": {
+    "description": "Template for scanner event logs.",
+    "ecs_version": "8.17.0"
+  },
+  "composed_of": [
+    "ecs_8.17.0_base",
+    "ecs_8.17.0_event",
+    "ecs_8.17.0_network"
+  ],
+  "data_stream": {},
+  "index_patterns": [
+    "logs-event-scan"
+  ],
+  "template": {
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "max_result_window": 100000,
+        "number_of_replicas": 0,
+        "number_of_shards": 5,
+        "refresh_interval": "5s"
+      }
+    }
+  },
+  "priority": 200,
+  "version": 1
+}

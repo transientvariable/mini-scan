@@ -1,0 +1,22 @@
+# Build
+# ---------------------------------------------
+build/
+deploy/kubernetes
+deploy/scaffold
+deploy/terraform
+Makefile
+
+# Development
+# ---------------------------------------------
+bin/
+examples/
+incubating/
+scratch/
+*.adoc
+.git
+.gitignore
+.idea
+*.log
+*.md
+*README*
+*CONFIGURATION*

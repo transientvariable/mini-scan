@@ -1,6 +1,5 @@
 version: '3'
 services:
-
   # Starts the P/S emulator
   pubsub:
     image: gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators
@@ -12,7 +11,6 @@ services:
       interval: 5s
       timeout: 10s
       retries: 3
-
   # Creates a topic
   mk-topic:
     image: alpine/httpie
@@ -20,15 +18,13 @@ services:
       pubsub:
         condition: service_healthy
     command: PUT http://pubsub:8085/v1/projects/test-project/topics/scan-topic
-
   # Creates a subscription
   mk-subscription:
     image: alpine/httpie
     depends_on:
       mk-topic:
         condition: service_completed_successfully
-    command: PUT http://pubsub:8085/v1/projects/test-project/subscriptions/scan-sub topic=projects/test-project/topics/scan-topic --ignore-stdin 
-
+    command: PUT http://pubsub:8085/v1/projects/test-project/subscriptions/scan-sub topic=projects/test-project/topics/scan-topic --ignore-stdin
   # Runs the "scanner"
   scanner:
     depends_on:

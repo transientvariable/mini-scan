@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "description": "Defines fields for time-series data such as logs, events, and metrics.",
+    "documentation": "https://www.elastic.co/guide/en/ecs/current/ecs-data_stream.html",
+    "ecs_version": "8.17.0"
+  },
+  "template": {
+    "mappings": {
+      "properties": {
+        "data_stream": {
+          "properties": {
+            "dataset": {
+              "type": "constant_keyword"
+            },
+            "namespace": {
+              "type": "constant_keyword"
+            },
+            "type": {
+              "type": "constant_keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}
