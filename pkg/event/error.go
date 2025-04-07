@@ -1,11 +1,9 @@
-package scan
+package event
 
 // Enumeration of common errors that may be returned during event operations.
 const (
-	ErrClosed                 = eventError("already closed")
 	ErrDataFormatInvalid      = eventError("data format invalid")
 	ErrDataVersionUnsupported = eventError("data version unsupported")
-	ErrInvalid                = eventError("invalid argument")
 )
 
 // eventError defines the type for errors that may be returned during event operations.

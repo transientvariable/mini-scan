@@ -1,4 +1,4 @@
-package pkg
+package miniscan
 
 const (
 	// Opensearch configuration path.

@@ -13,6 +13,8 @@ type Scan struct {
 	Timestamp   int64       `json:"timestamp"`
 	DataVersion int         `json:"data_version"`
 	Data        interface{} `json:"data"`
+
+	err error
 }
 
 type V1Data struct {
