@@ -1,4 +1,4 @@
-package pubsub
+package messaging
 
 // Enumeration of common errors that may be returned during pub/sub operations.
 const (

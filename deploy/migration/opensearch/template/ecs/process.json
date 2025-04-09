@@ -82,14 +82,14 @@
                   "type": "date"
                 },
                 "exports": {
-                  "type": "flattened"
+                  "type": "flat_object"
                 },
                 "go_import_hash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "go_imports": {
-                  "type": "flattened"
+                  "type": "flat_object"
                 },
                 "go_imports_names_entropy": {
                   "type": "long"
@@ -140,7 +140,7 @@
                   "type": "keyword"
                 },
                 "imports": {
-                  "type": "flattened"
+                  "type": "flat_object"
                 },
                 "imports_names_entropy": {
                   "type": "long"
@@ -472,7 +472,6 @@
             },
             "env_vars": {
               "ignore_above": 1024,
-              "synthetic_source_keep": "none",
               "type": "keyword"
             },
             "executable": {
@@ -756,7 +755,7 @@
                   "type": "keyword"
                 },
                 "go_imports": {
-                  "type": "flattened"
+                  "type": "flat_object"
                 },
                 "go_imports_names_entropy": {
                   "type": "long"
@@ -772,7 +771,7 @@
                   "type": "keyword"
                 },
                 "imports": {
-                  "type": "flattened"
+                  "type": "flat_object"
                 },
                 "imports_names_entropy": {
                   "type": "long"
@@ -891,14 +890,14 @@
                       "type": "date"
                     },
                     "exports": {
-                      "type": "flattened"
+                      "type": "flat_object"
                     },
                     "go_import_hash": {
                       "ignore_above": 1024,
                       "type": "keyword"
                     },
                     "go_imports": {
-                      "type": "flattened"
+                      "type": "flat_object"
                     },
                     "go_imports_names_entropy": {
                       "type": "long"
@@ -949,7 +948,7 @@
                       "type": "keyword"
                     },
                     "imports": {
-                      "type": "flattened"
+                      "type": "flat_object"
                     },
                     "imports_names_entropy": {
                       "type": "long"
@@ -1113,7 +1112,7 @@
                       "type": "keyword"
                     },
                     "go_imports": {
-                      "type": "flattened"
+                      "type": "flat_object"
                     },
                     "go_imports_names_entropy": {
                       "type": "long"
@@ -1129,7 +1128,7 @@
                       "type": "keyword"
                     },
                     "imports": {
-                      "type": "flattened"
+                      "type": "flat_object"
                     },
                     "imports_names_entropy": {
                       "type": "long"
@@ -1196,7 +1195,7 @@
                       "type": "keyword"
                     },
                     "go_imports": {
-                      "type": "flattened"
+                      "type": "flat_object"
                     },
                     "go_imports_names_entropy": {
                       "type": "long"
@@ -1216,7 +1215,7 @@
                       "type": "keyword"
                     },
                     "imports": {
-                      "type": "flattened"
+                      "type": "flat_object"
                     },
                     "imports_names_entropy": {
                       "type": "long"
@@ -1258,6 +1257,9 @@
                       "type": "nested"
                     }
                   }
+                },
+                "pgid": {
+                  "type": "long"
                 },
                 "pid": {
                   "type": "long"
@@ -1341,12 +1343,10 @@
                       "properties": {
                         "effective": {
                           "ignore_above": 1024,
-                          "synthetic_source_keep": "none",
                           "type": "keyword"
                         },
                         "permitted": {
                           "ignore_above": 1024,
-                          "synthetic_source_keep": "none",
                           "type": "keyword"
                         }
                       }
@@ -1441,7 +1441,7 @@
                   "type": "keyword"
                 },
                 "go_imports": {
-                  "type": "flattened"
+                  "type": "flat_object"
                 },
                 "go_imports_names_entropy": {
                   "type": "long"
@@ -1461,7 +1461,7 @@
                   "type": "keyword"
                 },
                 "imports": {
-                  "type": "flattened"
+                  "type": "flat_object"
                 },
                 "imports_names_entropy": {
                   "type": "long"
@@ -1503,6 +1503,9 @@
                   "type": "nested"
                 }
               }
+            },
+            "pgid": {
+              "type": "long"
             },
             "pid": {
               "type": "long"
@@ -1819,12 +1822,10 @@
                   "properties": {
                     "effective": {
                       "ignore_above": 1024,
-                      "synthetic_source_keep": "none",
                       "type": "keyword"
                     },
                     "permitted": {
                       "ignore_above": 1024,
-                      "synthetic_source_keep": "none",
                       "type": "keyword"
                     }
                   }

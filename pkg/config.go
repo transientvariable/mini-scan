@@ -4,7 +4,7 @@ const (
 	// Opensearch configuration path.
 	//
 	// String: <root>.repository.opensearch
-	Opensearch = ".repository.opensearch"
+	Opensearch = "config.repository.opensearch"
 
 	// Addresses configuration path.
 	//

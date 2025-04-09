@@ -8,7 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/censys/scan-takehome/pkg/pubsub"
+	"github.com/censys/scan-takehome/pkg/messaging"
+
+	"github.com/transientvariable/anchor"
+	"github.com/transientvariable/log-go"
 
 	miniscan "github.com/censys/scan-takehome/pkg"
 	json "github.com/json-iterator/go"
@@ -27,13 +30,36 @@ type encoded struct {
 	err  error
 }
 
-type ScanEmulator struct {
-	interval time.Duration
-	services []string
+type noopPublisher struct{}
+
+func (p *noopPublisher) Publish(msg any) error {
+	var s string
+	switch m := msg.(type) {
+	case []byte:
+		s = string(m)
+	case fmt.Stringer:
+		s = m.String()
+	default:
+		s = fmt.Sprintf("%v", msg)
+	}
+	log.Info(fmt.Sprintf("[scan:emulator] received message: %s", s))
+	return nil
 }
 
-func NewScanEmulator[T any](publisher pubsub.Publisher[T], options ...func(*ScanEmulator)) *ScanEmulator {
-	e := &ScanEmulator{}
+func (p *noopPublisher) Close() error {
+	return nil
+}
+
+// Emulator can be used for generating emulated scans.
+type Emulator struct {
+	interval  time.Duration
+	publisher messaging.Publisher[any]
+	services  []string
+}
+
+// NewEmulator creates a new Emulator.
+func NewEmulator(options ...func(*Emulator)) *Emulator {
+	e := &Emulator{}
 	for _, opt := range options {
 		opt(e)
 	}
@@ -45,25 +71,65 @@ func NewScanEmulator[T any](publisher pubsub.Publisher[T], options ...func(*Scan
 	if len(e.services) == 0 {
 		e.services = strings.Split(EmulatorServices, ",")
 	}
-	return &ScanEmulator{}
+
+	if e.publisher == nil {
+		e.publisher = &noopPublisher{}
+	}
+	return e
 }
 
-func (e *ScanEmulator) Emulate(ctx context.Context) error {
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	_, err := miniscan.Generate(ctx, e.next, e.interval)
+// Emulate runs the Emulator.
+func (e *Emulator) Emulate(ctx context.Context) error {
+	scans, err := miniscan.Generate(ctx, e.next, e.interval)
 	if err != nil {
 		return err
 	}
+	errors := make(chan error)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
+	go func() {
+		for s := range scans {
+			err := s.err
+			if err == nil {
+				err = e.publisher.Publish(s.scan)
+			}
+			select {
+			case errors <- err:
+			case <-ctx.Done():
+				break
+			}
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		wg.Wait()
+		close(errors)
+	}()
+
+	go func() {
+		for err := range errors {
+			if err != nil {
+				log.Error("[scan:emulator]", log.Err(err))
+				return
+			}
+		}
+	}()
 	return nil
 }
 
-func (e *ScanEmulator) next() encoded {
+// String returns a string representing the current state of the Emulator.
+func (e *Emulator) String() string {
+	return string(anchor.ToJSONFormatted(map[string]any{
+		"scan_emulator": map[string]any{
+			"interval": e.interval.String(),
+			"services": e.services,
+		}}))
+}
+
+func (e *Emulator) next() encoded {
 	scan := &Scan{
 		Ip:        fmt.Sprintf("1.1.1.%d", rand.Intn(255)),
 		Port:      uint32(rand.Intn(65535)),
@@ -88,17 +154,24 @@ func (e *ScanEmulator) next() encoded {
 }
 
 // WithInterval sets the time duration to wait between generating emulated scans.
-func WithInterval(interval time.Duration) func(*ScanEmulator) {
-	return func(e *ScanEmulator) {
+func WithInterval(interval time.Duration) func(*Emulator) {
+	return func(e *Emulator) {
 		e.interval = interval
+	}
+}
+
+// WithPublisher sets the pubsub.Publisher to use for publishing emulated scans.
+func WithPublisher(publisher messaging.Publisher[any]) func(*Emulator) {
+	return func(e *Emulator) {
+		e.publisher = publisher
 	}
 }
 
 // WithServices sets the list of services to use when generating emulated scans.
 //
 // The default list of services is defined by EmulatorServices.
-func WithServices(services ...string) func(*ScanEmulator) {
-	return func(e *ScanEmulator) {
+func WithServices(services ...string) func(*Emulator) {
+	return func(e *Emulator) {
 		for _, s := range services {
 			if s = strings.TrimSpace(s); s != "" {
 				e.services = append(e.services, strings.ToUpper(s))

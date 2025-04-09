@@ -1,4 +1,4 @@
-package pubsub
+package messaging
 
 import "context"
 
@@ -10,9 +10,12 @@ type Handler[T any] interface {
 }
 
 type Publisher[T any] interface {
-	Publish(ctx context.Context, msg T) error
+	Publish(msg T) error
+	Close() error
 }
 
 type Subscriber[T any] interface {
-	Subscribe(ctx context.Context, handlers ...Handler[T]) error
+	Subscribe(handlers ...Handler[T]) error
+	Add(handler Handler[T]) bool
+	Close() error
 }

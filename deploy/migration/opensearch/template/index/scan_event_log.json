@@ -1,12 +1,13 @@
 {
   "_meta": {
-    "description": "Template for scanner event logs.",
+    "description": "Template for scan event logs.",
     "ecs_version": "8.17.0"
   },
   "composed_of": [
     "ecs_8.17.0_base",
     "ecs_8.17.0_event",
-    "ecs_8.17.0_network"
+    "ecs_8.17.0_network",
+    "ecs_8.17.0_source"
   ],
   "data_stream": {},
   "index_patterns": [

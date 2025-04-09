@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "description": "Template for scan metadata indices."
+  },
+  "composed_of": [
+    "ecs_8.17.0_base",
+    "ecs_8.17.0_network",
+    "ecs_8.17.0_source"
+  ],
+  "index_patterns": [
+    "metadata-scan"
+  ],
+  "template": {
+    "settings": {
+      "codec": "best_compression",
+      "index.max_result_window": 100000,
+      "number_of_replicas": 0,
+      "number_of_shards": 5,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "properties": {
+        "id": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "modified": {
+          "type": "date"
+        }
+      }
+    }
+  },
+  "priority": 100,
+  "version": 1
+}

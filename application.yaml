@@ -41,7 +41,7 @@ config:
     opensearch:
 
       # Sets the list of addresses for OpenSearch nodes.
-      addresses: ${MS_REPOSITORY_OPENSEARCH_ADDRESSES | http://ms-search-node:9200}
+      addresses: ${MS_REPOSITORY_OPENSEARCH_ADDRESSES | http://search-node:9200}
 
       # The OpenSearch user principal.
       username: ${MS_REPOSITORY_OPENSEARCH_USERNAME}
@@ -56,7 +56,7 @@ config:
 
         templatePath: ${MS_REPOSITORY_OPENSEARCH_MAPPING_TEMPLATE_PATH | deploy/migration/opensearch/template}
 
-        indicesPath: ${MS_REPOSITORY_OPENSEARCH_MAPPING_INDICES_PATH | /etc/mini-scan/storage/indices.json}
+        indicesPath: ${MS_REPOSITORY_OPENSEARCH_MAPPING_INDICES_PATH | deploy/repository/indices.json}
 
       retry:
 

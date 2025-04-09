@@ -1,51 +1,40 @@
 {
   "_meta": {
-    "description": "Defines the attributes for a general computing instance that details about the host on which an event happened, or from which a measurement was taken.",
-    "documentation": "https://www.elastic.co/guide/en/ecs/current/ecs-host.html",
+    "description": "captures details about the sender of a network exchange/packet.",
+    "documentation": "https://www.elastic.co/guide/en/ecs/current/ecs-source.html",
     "ecs_version": "8.17.0"
   },
   "template": {
     "mappings": {
       "properties": {
-        "host": {
+        "source": {
           "properties": {
-            "architecture": {
+            "address": {
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "boot": {
+            "as": {
               "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
-            "cpu": {
-              "properties": {
-                "usage": {
-                  "scaling_factor": 1000,
-                  "type": "scaled_float"
-                }
-              }
-            },
-            "disk": {
-              "properties": {
-                "read": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    }
-                  }
+                "number": {
+                  "type": "long"
                 },
-                "write": {
+                "organization": {
                   "properties": {
-                    "bytes": {
-                      "type": "long"
+                    "name": {
+                      "fields": {
+                        "text": {
+                          "type": "match_only_text"
+                        }
+                      },
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 }
               }
+            },
+            "bytes": {
+              "type": "long"
             },
             "domain": {
               "ignore_above": 1024,
@@ -98,14 +87,6 @@
                 }
               }
             },
-            "hostname": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "id": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
             "ip": {
               "type": "ip"
             },
@@ -113,41 +94,45 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "name": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "network": {
+            "nat": {
               "properties": {
-                "egress": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "packets": {
-                      "type": "long"
-                    }
-                  }
+                "ip": {
+                  "type": "ip"
                 },
-                "ingress": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "packets": {
-                      "type": "long"
-                    }
-                  }
+                "port": {
+                  "type": "long"
                 }
               }
             },
-            "os": {
+            "packets": {
+              "type": "long"
+            },
+            "port": {
+              "type": "long"
+            },
+            "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "top_level_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "user": {
               "properties": {
-                "family": {
+                "domain": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "full": {
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "full_name": {
                   "fields": {
                     "text": {
                       "type": "match_only_text"
@@ -156,7 +141,27 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "kernel": {
+                "group": {
+                  "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -169,54 +174,11 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "platform": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "type": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "version": {
+                "roles": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
               }
-            },
-            "pid_ns_ino": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "risk": {
-              "properties": {
-                "calculated_level": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "calculated_score": {
-                  "type": "float"
-                },
-                "calculated_score_norm": {
-                  "type": "float"
-                },
-                "static_level": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "static_score": {
-                  "type": "float"
-                },
-                "static_score_norm": {
-                  "type": "float"
-                }
-              }
-            },
-            "type": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "uptime": {
-              "type": "long"
             }
           }
         }
