@@ -1,0 +1,57 @@
+= Configuration
+Matt Nicholls <transientvariable@protonmail.com>
+:keywords: configuration
+:experimental: true
+:icons: font
+:iconfont-cdn: //cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/fontawesome.min.css
+:imagesdir: docs/image
+:sectanchors: true
+:source-highlighter: prettify
+:toc: left
+:toclevels: 3
+:toc-title: Contents
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+== Usage
+This application uses an externalized configuration mechanism which allows the same codebase to be configured for different
+environments. Configuration property values are specified using a YAML file whose default values can be overridden
+using environment variables.
+
+[NOTE]
+====
+The provided link:application.yaml[application.yaml] configuration file contains all the property values used
+by the application and can be used as-is or modified as needed to suit the requirements for a specific environment.
+====
+
+A configuration file is specified as command-line argument to the main application executable. For example:
+
+  $ go run main.go /path/to/application.yaml
+
+Using an environment variable override:
+
+  $ MS_REPOSITORY_OPENSEARCH_ADDRESSES="http://search-node" go run main.go /path/to/application.yaml
+
+=== Property Value Syntax
+
+Property values that use the placeholder syntax `${ ... }` are resolved via environment variables. For example, on a POSIX system, the following variable could be defined in `.bashrc`, `.profile`, `.bash_profile`, or via the command-line:
+
+  export FOO="bar"
+
+which could then be referenced by value:
+
+  some-application-property: ${FOO}
+
+At runtime, the value for `some-application-property` would be `bar`.
+
+The pipe `|` symbol can be used within a placeholder to specify a default value if an environment variable cannot be resolved. For example:
+
+  required-application-property: ${DOES_NOT_EXIST | baz}
+
+At runtime, the value for `required-application-property` would be `baz` if the environment variable `DOES_NOT_EXIST` was not set.

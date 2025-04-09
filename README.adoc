@@ -1,0 +1,313 @@
+= Mini-Scan
+Matt Nicholls <transientvariable@protonmail.com>
+:keywords: endpoint security,EDR,censys
+:experimental: true
+:icons: font
+:iconfont-cdn: //cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/fontawesome.min.css
+:imagesdir: docs/image
+:sectanchors: true
+:source-highlighter: prettify
+:toc:
+:toclevels: 3
+:toc-title: Contents
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+== Overview
+
+Mini-Scan is an event-driven component (a.k.a asynchronous receiver) that is consumes, routes, and aggregates agent scan data from messaging middleware, persisting it to a storage backend (e.g. OpenSearch).
+
+image::mini-scan-data-flow.jpg[align="center"]
+
+== Project Structure [[development_project_structure]]
+
+The application code is organized into the following structure:
+
+[source,bash]
+----
+├── application.yaml
+├── cmd <1>
+│   └── ...
+├── CODEOWNERS
+├── CONFIGURATION.adoc
+├── deploy <2>
+│   └── ...
+├── go.mod
+├── go.sum
+├── main.go <3>
+├── Makefile <4>
+├── pkg <5>
+│   └── ...
+└── README.adoc
+----
+<1> Supplemental entrypoint code.
+<2> Configuration for provisioning and deployment of infrastructure (Docker, Terraform, etc.).
+<3> The main entrypoint for running the application (e.g. `go run main.go`).
+<4> The `make` build script that orchestrates the build and deployment process.
+<5> Contains the core of the application code.
+
+=== Dependencies [[development_project_dependencies]]
+
+In order to develop and maintain the mini-scan codebase, the following dependencies are required:
+
+.Required
+* https://www.docker.com/get-started[Docker] version 28.x or later
+* https://docs.docker.com/compose/install/[Docker Compose] version 2.34 or later
+* https://git-scm.com/[Git] version management tool
+* https://golang.org/dl/[Golang] version 1.24 or later for local development
+
+.Optional
+* Terminal multiplexer such as https://github.com/tmux/tmux/wiki[tmux] or https://www.byobu.org/[byobu]
+* Command-line JSON processor such as https://jmespath.org/libraries.html[jmespath] or https://jqlang.org/[jq]
+* Command-line HTTP tool such as https://curl.se/[cURL] or https://httpie.io/[httpie]
+* The https://github.com/opensearch-project/sql-cli[OpenSearch SQL CLI] for querying scan data using standard SQL syntax
+
+=== Build
+
+Fetch the source:
+
+[source%nowrap,bash]
+----
+❯ git clone https://github.com/tranientvariable/mini-scan.git && $_
+----
+
+Execute the command `make` which will execute the following rules:
+
+* `clean` - removes any residual build artifacts from a previous build
+* `check` - runs unit and integration tests
+* `build` - creates the application binary (e.g. `./build/scanner`)
+* `build.docker` - creates the Docker image for the application and its dependencies
+
+[source%nowrap,bash]
+----
+❯ make
+→ Cleaning project build output directory: build
+→ No checks for this repository at this time...
+→ Building application binary...
+all modules verified
+→ Docker build...
+[+] Building 7.4s (22/22) FINISHED                                                                                             docker:default
+ => [internal] load build definition from Dockerfile                                                                                     0.0s
+ => => transferring dockerfile: 1.35kB                                                                                                   0.0s
+ => [internal] load metadata for docker.io/library/debian:bookworm-slim                                                                  0.3s
+ => [internal] load metadata for docker.io/library/golang:1.24-bookworm                                                                  0.3s
+ => [auth] library/debian:pull token for registry-1.docker.io                                                                            0.0s
+ => [auth] library/golang:pull token for registry-1.docker.io                                                                            0.0s
+ => [internal] load .dockerignore
+                                                                                                                                         0.0s
+ ...
+
+ => [builder 5/5] RUN go build -ldflags="-w -s" -o scanner .                                                                             7.0s
+ => CACHED [stage-2 2/7] WORKDIR /app                                                                                                    0.0s
+ => CACHED [stage-2 3/7] RUN groupadd -r scanner && useradd -r -g scanner scanner                                                        0.0s
+ => CACHED [stage-2 4/7] COPY --chown=scanner:scanner --from=builder /src/scanner .                                                      0.0s
+ => CACHED [stage-2 5/7] COPY --chown=scanner:scanner deploy/migration ./deploy/migration                                                0.0s
+ => CACHED [stage-2 6/7] COPY --chown=scanner:scanner deploy/repository ./deploy/repository                                              0.0s
+ => CACHED [stage-2 7/7] COPY --chown=scanner:scanner application.yaml application.yaml                                                  0.0s
+ => exporting to image                                                                                                                   0.0s
+ => => exporting layers                                                                                                                  0.0s
+ => => writing image sha256:0b615fd84b1275140f48ba65abda87024d21cfef7a8d87236f52c0053036af4d                                             0.0s
+ => => naming to docker.io/transientvariable/mini-scan
+----
+
+=== Deploy
+
+==== Docker Compose
+
+From the root of the `mini-scan` repository, deploy the application using `docker-compose` command:
+
+[source%nowrap,bash]
+----
+❯ docker-compose -f deploy/docker/services.yaml up
+----
+
+which should produce output similar to the following, with log messages showing active processing of scan data:
+
+[source%nowrap,bash]
+----
+pubsub             | [pubsub] Apr 09, 2025 6:24:24 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+pubsub             | [pubsub] INFO: Detected non-HTTP/2 connection.
+scanner            | 6:24PM INF ../src/pkg/messaging/gcp/publisher.go:108 > [gcp_publisher:publish] publishing message: {"ip":"1.1.1.161","port":39492,"service":"SSH","timestamp":1744223065,"data_version":1,"data":{"response_bytes_utf8":"c2VydmljZSByZXNwb25zZTogOTA="}}
+search-node        | [2025-04-09T18:24:25,670][INFO ][o.o.m.c.MLSyncUpCron     ] [search-node] ML configuration already initialized, no action needed
+scanner            | 6:24PM INF ../src/pkg/messaging/gcp/publisher.go:108 > [gcp_publisher:publish] publishing message: {"ip":"1.1.1.103","port":37042,"service":"SSH","timestamp":1744223066,"data_version":1,"data":{"response_bytes_utf8":"c2VydmljZSByZXNwb25zZTogNjY="}}
+scanner            | 6:24PM INF ../src/pkg/messaging/handler/log.go:42 > [handler:log] GDK message received id=7 metadata=null size=134
+scanner            | 6:24PM INF ../src/pkg/messaging/handler/event_scan.go:93 > [handler:scan_event] processing scan metadata id=22d3ac5c5b70efaac65e5eddd3442c90cf5d743283ea3ad3601b8ed922b5052c ip=1.1.1.24 port=47979 processed=6 service=HTTP ts=2025-04-09T18:24:17Z
+scanner            | 6:24PM INF ../src/pkg/messaging/gcp/publisher.go:108 > [gcp_publisher:publish] publishing message: {"ip":"1.1.1.209","port":14836,"service":"SSH","timestamp":1744223067,"data_version":1,"data":{"response_bytes_utf8":"c2VydmljZSByZXNwb25zZTogNTY="}}
+scanner            | 6:24PM INF ../src/pkg/messaging/gcp/publisher.go:108 > [gcp_publisher:publish] publishing message: {"ip":"1.1.1.244","port":61043,"service":"HTTP","timestamp":1744223068,"data_version":1,"data":{"response_bytes_utf8":"c2VydmljZSByZXNwb25zZTogOTA="}}
+scanner            | 6:24PM INF ../src/pkg/messaging/handler/log.go:42 > [handler:log] GDK message received id=8 metadata=null size=134
+scanner            | 6:24PM INF ../src/pkg/messaging/handler/event_scan.go:93 > [handler:scan_event] processing scan metadata id=e8407269a9df597e290093e9e75f7918565cc7a02619b90d94e64cbdf525f57d ip=1.1.1.15 port=10454 processed=7 service=HTTP ts=2025-04-09T18:24:18Z
+scanner            | 6:24PM INF ../src/pkg/messaging/gcp/publisher.go:108 > [gcp_publisher:publish] publishing message: {"ip":"1.1.1.174","port":6087,"service":"HTTP","timestamp":1744223069,"data_version":1,"data":{"response_bytes_utf8":"c2VydmljZSByZXNwb25zZTogMjk="}}
+pubsub             | [pubsub] Apr 09, 2025 6:24:29 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+pubsub             | [pubsub] INFO: Detected non-HTTP/2 connection.
+scanner            | 6:24PM INF ../src/pkg/messaging/gcp/publisher.go:108 > [gcp_publisher:publish] publishing message: {"ip":"1.1.1.126","port":43724,"service":"HTTP","timestamp":1744223070,"data_version":2,"data":{"response_str":"service response: 33"}}
+scanner            | 6:24PM INF ../src/pkg/messaging/gcp/publisher.go:108 > [gcp_publisher:publish] publishing message: {"ip":"1.1.1.27","port":53712,"service":"SSH","timestamp":1744223071,"data_version":2,"data":{"response_str":"service response: 71"}}
+scanner            | 6:24PM INF ../src/pkg/messaging/handler/log.go:42 > [handler:log] GDK message received id=9 metadata=null size=147
+scanner            | 6:24PM INF ../src/pkg/messaging/handler/event_scan.go:93 > [handler:scan_event] processing scan metadata id=d50a5ba2609470bc6f9b064b4c67afa443f374c00a019614a9a02ad18fa5096f ip=1.1.1.65 port=5720 processed=8 service=SSH ts=2025-04-09T18:24:19Z
+scanner            | 6:24PM INF ../src/pkg/messaging/gcp/publisher.go:108 > [gcp_publisher:publish] publishing message: {"ip":"1.1.1.22","port":48075,"service":"HTTP","timestamp":1744223072,"data_version":1,"data":{"response_bytes_utf8":"c2VydmljZSByZXNwb25zZTogNzA="}}
+----
+
+=== Scan Data
+
+==== Schema
+
+Scan data is persisted to an https://opensearch.org/[OpenSearch] node to two separate indices:
+
+* `logs-event-scan` - A time-series index of scan data that uses https://opensearch.org/docs/latest/im-plugin/data-streams/[Data Streams]
+* `metadata-scan` - An index that contains metadata for unique scan events
+
+[NOTE]
+.Elastic Data Streams
+====
+More in-depth documentation of Data Streams is available in the https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams.html[Elastic documentation].
+====
+
+The structure of the data for each index uses the https://github.com/elastic/ecs[Elastic Common Schema (ECS)]. The JSON schema definitions are available in the link:deploy/migration/opensearch/template/[`deploy/migration/opensearch/template/`] directory of the project.
+
+==== Inspection
+
+===== cURL
+
+There several methods for inspecting the data persisted by Mini-Scan. The simplest method is using link:++https://curl.se/[cURL]++[cURL] via the command-line to query the OpenSearch API.
+
+.Basic Query of metadata-scan Index Using cURL
+
+This is a basic query using the https://opensearch.org/docs/latest/query-dsl/match-all/[match_all] query, with the result piped to https://jqlang.org/[jq] to make it more human-readable.
+[source%nowrap,bash]
+----
+curl -s -XGET "http://localhost:9200/metadata-scan/_search" -H 'Content-Type: application/json' -d'
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  }
+}' | jq
+----
+
+Result:
+[source%nowrap,bash]
+----
+{
+  "took": 2,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1244,
+      "relation": "eq"
+    },
+    "max_score": 1.0,
+    "hits": [
+      {
+        "_index": "metadata-scan",
+        "_id": "1fd1f5b5297d82b4a1993378bc009d918294cda5c2806bbc4e90244930251d83",
+        "_score": 1.0,
+        "_source": {
+          "@timestamp": "2025-04-09T18:24:16Z",
+          "message": "service response: 15",
+          "network": {
+            "bytes": 20,
+            "protocol": "HTTP",
+            "type": ""
+          },
+          "source": {
+            "address": "",
+            "bytes": 0,
+            "domain": "",
+            "ip": "1.1.1.29",
+            "mac": "",
+            "packets": 0,
+            "port": 15677,
+            "registered_domain": "",
+            "top_level_domain": "",
+            "subdomain": ""
+          },
+          "id": "1fd1f5b5297d82b4a1993378bc009d918294cda5c2806bbc4e90244930251d83"
+        }
+      }
+    ]
+  }
+}
+----
+
+.Basic Query of metadata-scan Index Using httpie
+A more compact variant of the cURL example using link:++https://httpie.io/[httpie]++[httpie].
+[source%nowrap,bash]
+----
+http "http://localhost:9200/metadata-scan/_search" <<< '{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  }
+}'
+----
+
+Result:
+[source%nowrap,bash]
+----
+{
+    "_shards":
+    {
+        "failed": 0,
+        "skipped": 0,
+        "successful": 5,
+        "total": 5
+    },
+    "hits":
+    {
+        "hits": [
+        {
+            "_id": "e372ce44a70cdada1ae5d01bce7bc2066ac61a43a4ae90d2a48dba16b04c726f",
+            "_index": "metadata-scan",
+            "_score": 1.0,
+            "_source":
+            {
+                "@timestamp": "2025-04-09T18:46:27Z",
+                "id": "e372ce44a70cdada1ae5d01bce7bc2066ac61a43a4ae90d2a48dba16b04c726f",
+                "message": "service response: 45",
+                "network":
+                {
+                    "bytes": 20,
+                    "protocol": "SSH",
+                    "type": ""
+                },
+                "source":
+                {
+                    "address": "",
+                    "bytes": 0,
+                    "domain": "",
+                    "ip": "1.1.1.3",
+                    "mac": "",
+                    "packets": 0,
+                    "port": 45824,
+                    "registered_domain": "",
+                    "subdomain": "",
+                    "top_level_domain": ""
+                }
+            }
+        }],
+        "max_score": 1.0,
+        "total":
+        {
+            "relation": "eq",
+            "value": 1369
+        }
+    },
+    "timed_out": false,
+    "took": 0
+}
+----
+
+===== OpenSearch Dashboards
+
+Scan data can also be queried using the https://opensearch.org/docs/latest/dashboards/[OpenSearch Dashboards] front-end by navigating to http://localhost:5601/app/home with the application still deployed.
