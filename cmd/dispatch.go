@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/transientvariable/config-go"
-	opensearch "github.com/transientvariable/repository-opensearch-go"
 	"sync"
 
 	"github.com/censys/scan-takehome/pkg/messaging"
@@ -13,9 +11,11 @@ import (
 	"github.com/censys/scan-takehome/pkg/messaging/handler"
 	"github.com/censys/scan-takehome/pkg/scanning"
 
+	"github.com/transientvariable/config-go"
 	"github.com/transientvariable/log-go"
 
 	miniscan "github.com/censys/scan-takehome/pkg"
+	opensearch "github.com/transientvariable/repository-opensearch-go"
 )
 
 type dispatcher struct {
@@ -29,6 +29,8 @@ type dispatcher struct {
 }
 
 func newDispatcher(projectID string, topicID string, subscriptionName string) (*dispatcher, error) {
+	log.Info(fmt.Sprintf("config:\n\n%s\n", config.String()))
+
 	d := &dispatcher{}
 	d.ctx, d.ctxCancel = context.WithCancel(context.Background())
 
@@ -67,7 +69,7 @@ func newDispatcher(projectID string, topicID string, subscriptionName string) (*
 			opensearch.WithAddresses(config.ValueMustResolve(miniscan.Addresses)),
 			opensearch.WithMappingTemplatePath(config.ValueMustResolve(miniscan.MappingTemplatePath)),
 			opensearch.WithIndicesPath(config.ValueMustResolve(miniscan.MappingIndicesPath)),
-			opensearch.WithMappingCreate(true)),
+			opensearch.WithMappingCreate(config.BoolMustResolve(miniscan.MappingCreate))),
 		))
 	if err != nil {
 		return nil, fmt.Errorf("cmd_dispatch: %w", err)

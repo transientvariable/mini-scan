@@ -197,8 +197,8 @@ github.com/transientvariable/hold v0.0.0-20250409015808-249cfe1ee5c6 h1:fNYroEb3
 github.com/transientvariable/hold v0.0.0-20250409015808-249cfe1ee5c6/go.mod h1:zO41pitQz1DCsayyO1xXfuWI7Hx2HshN6CnBCUcUZyw=
 github.com/transientvariable/log-go v0.0.0-20250409020134-22cb40d13781 h1:eJQSsObUBE/NIO1JkhraZCVNdDT3S7BQcUUkyP1hD3Y=
 github.com/transientvariable/log-go v0.0.0-20250409020134-22cb40d13781/go.mod h1:rC3v8Pl6nBbJ5+rphK8c5JumqxEB8vIN6FeyRrM5YpY=
-github.com/transientvariable/repository-opensearch-go v0.0.0-20250409022835-65d93ae03ddd h1:IlLcxLxEFX+l0L/oFFFpNDd0smxQWtnbA0ojRhP6mHk=
-github.com/transientvariable/repository-opensearch-go v0.0.0-20250409022835-65d93ae03ddd/go.mod h1:dCMrxfCG8OVSD589W+9qvdArI3UPyXnyMPLYFtchVlI=
+github.com/transientvariable/repository-opensearch-go v0.0.0-20250409153824-f9fc4a2f96d3 h1:6a/IZBv8ywPu4lO+Pu/YSV4xZ5cRgNnzOhIUZ4/vN18=
+github.com/transientvariable/repository-opensearch-go v0.0.0-20250409153824-f9fc4a2f96d3/go.mod h1:dCMrxfCG8OVSD589W+9qvdArI3UPyXnyMPLYFtchVlI=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 go.einride.tech/aip v0.68.1 h1:16/AfSxcQISGN5z9C5lM+0mLYXihrHbQ1onvYTr93aQ=
 go.einride.tech/aip v0.68.1/go.mod h1:XaFtaj4HuA3Zwk9xoBtTWgNubZ0ZZXv9BZJCkuKuWbg=

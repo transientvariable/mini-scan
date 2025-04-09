@@ -136,7 +136,6 @@ func (h *scanEventHandler) OnMessage(ctx context.Context, msg any) error {
 	}
 
 	doc := opensearch.NewDocument(
-		opensearch.WithDocumentID(e.ID()),
 		opensearch.WithIndex(indexLogsEventScan),
 		opensearch.WithContent(anchor.ToJSON(e)),
 	)

@@ -44,10 +44,10 @@ config:
       addresses: ${MS_REPOSITORY_OPENSEARCH_ADDRESSES | http://search-node:9200}
 
       # The OpenSearch user principal.
-      username: ${MS_REPOSITORY_OPENSEARCH_USERNAME}
+      username: ${MS_REPOSITORY_OPENSEARCH_USERNAME | }
 
       # The password for the OpenSearch user.
-      password: ${MS_REPOSITORY_OPENSEARCH_PASSWORD}
+      password: ${MS_REPOSITORY_OPENSEARCH_PASSWORD | }
 
       # Index mapping configuration.
       mapping:

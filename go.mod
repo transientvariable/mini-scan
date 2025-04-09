@@ -13,7 +13,7 @@ require (
 	github.com/transientvariable/config-go v0.0.0-20250409020038-243334dfa796
 	github.com/transientvariable/hold v0.0.0-20250409015808-249cfe1ee5c6
 	github.com/transientvariable/log-go v0.0.0-20250409020134-22cb40d13781
-	github.com/transientvariable/repository-opensearch-go v0.0.0-20250409022835-65d93ae03ddd
+	github.com/transientvariable/repository-opensearch-go v0.0.0-20250409153824-f9fc4a2f96d3
 	gocloud.dev v0.41.0
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
 )
