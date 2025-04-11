@@ -21,7 +21,7 @@ endif::[]
 
 == Overview
 
-Mini-Scan is an event-driven component (a.k.a asynchronous receiver) that is consumes, routes, and aggregates agent scan data from messaging middleware, persisting it to a storage backend (e.g. OpenSearch).
+Mini-Scan is an event-driven component (a.k.a asynchronous receiver) that consumes, aggregates, and routes agent scan data from messaging middleware and persists it to a storage backend (e.g. OpenSearch) for further analysis.
 
 image::mini-scan-data-flow.jpg[align="center"]
 
